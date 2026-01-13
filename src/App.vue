@@ -1,11 +1,11 @@
 <script setup></script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
-</template>
+  <div class="min-h-screen flex flex-col bg-white">
+    <div class="p-4 text-lg font-semibold">
+      <img src="./assets/images/logo-hotelkey.png" alt="Logo" class="h-10 w-50" />
+    </div>
 
-<style scoped></style>
+    <router-view />
+  </div>
+</template>
