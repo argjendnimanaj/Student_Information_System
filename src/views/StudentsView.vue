@@ -1,13 +1,22 @@
 <script setup>
-import RegisterModal from '@/assets/components/RegisterModal.vue'
+import EditModal from '@/assets/components/modals/EditModal.vue'
+import RegisterModal from '@/assets/components/modals/RegisterModal.vue'
 import SearchBar from '@/assets/components/SearchBar.vue'
+import TableBase from '@/assets/components/TableBase.vue'
 import { ref, computed, onMounted } from 'vue'
 
 const students = ref([])
 const search = ref('')
 
-const showModal = ref(false)
-const showRegisterModal = () => (showModal.value = true)
+const openRegisterModal = ref(false)
+const showRegisterModal = () => (openRegisterModal.value = true)
+
+const openEditModal = ref(false)
+const editingStudent = ref(null)
+const openEdit = (student) => {
+  editingStudent.value = { ...student }
+  openEditModal.value = true
+}
 
 const filteredStudents = computed(() => {
   if (!search.value) return students.value
@@ -25,8 +34,21 @@ const filteredStudents = computed(() => {
 const handleSaveStudent = (student) => {
   students.value.push(student)
   localStorage.setItem('students', JSON.stringify(students.value))
-  showModal.value = false
+  openRegisterModal.value = false
 }
+
+const handleUpdateStudent = (updatedStudent) => {
+  const index = students.value.findIndex((student) => student.id === updatedStudent.id)
+
+  if (index !== -1) {
+    students.value[index] = updatedStudent
+    localStorage.setItem('students', JSON.stringify(students.value))
+  }
+
+  openEditModal.value = false
+}
+
+const theadLabels = ['Index', 'Name', 'DoB', 'Municipality', 'Action']
 
 onMounted(() => {
   const saved = localStorage.getItem('students')
@@ -96,50 +118,48 @@ onMounted(() => {
       </button>
     </div>
 
-    <RegisterModal v-if="showModal" @save="handleSaveStudent" @close="showModal = false" />
+    <RegisterModal
+      v-if="openRegisterModal"
+      @save="handleSaveStudent"
+      @close="openRegisterModal = false"
+    />
+
+    <EditModal
+      v-if="openEditModal"
+      :student="editingStudent"
+      @update="handleUpdateStudent"
+      @close="openEditModal = false"
+    />
 
     <!-- Table -->
     <div class="overflow-x-auto border border-gray-400">
-      <table class="w-full border-collapse text-sm">
-        <thead class="bg-gray-200">
-          <tr>
-            <th class="border border-gray-400 px-2 py-1 text-left">Index</th>
-            <th class="border border-gray-400 px-2 py-1 text-left">Name</th>
-            <th class="border border-gray-400 px-2 py-1 text-left">DoB</th>
-            <th class="border border-gray-400 px-2 py-1 text-left">Municipality</th>
-            <th class="border border-gray-400 px-2 py-1 text-left">Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr
-            v-for="student in filteredStudents"
-            :key="student.id"
-            class="even:bg-white odd:bg-gray-100"
-          >
-            <td class="border border-gray-400 px-2 py-1">
-              {{ student.id }}
-            </td>
-            <td class="border border-gray-400 px-2 py-1">
-              {{ student.name }}
-            </td>
-            <td class="border border-gray-400 px-2 py-1">
-              {{ student.dob }}
-            </td>
-            <td class="border border-gray-400 px-2 py-1">
-              {{ student.municipality }}
-            </td>
-            <td class="border border-gray-400 px-2 py-1 space-x-2">
-              <button class="text-blue-600 underline hover:text-blue-800 cursor-pointer">
-                Edit
-              </button>
-              <button class="text-blue-600 underline hover:text-blue-800 cursor-pointer">
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <TableBase :students="filteredStudents" :theadLabels="theadLabels">
+        <template #row="{ student }">
+          <td class="border border-gray-400 px-2 py-1">
+            {{ student.id }}
+          </td>
+          <td class="border border-gray-400 px-2 py-1">
+            {{ student.name }}
+          </td>
+          <td class="border border-gray-400 px-2 py-1">
+            {{ student.dob }}
+          </td>
+          <td class="border border-gray-400 px-2 py-1">
+            {{ student.municipality }}
+          </td>
+          <td class="border border-gray-400 px-2 py-1 space-x-2">
+            <button
+              @click="openEdit(student)"
+              class="text-blue-600 underline hover:text-blue-800 cursor-pointer"
+            >
+              Edit
+            </button>
+            <button class="text-blue-600 underline hover:text-blue-800 cursor-pointer">
+              Delete
+            </button>
+          </td>
+        </template>
+      </TableBase>
     </div>
   </div>
 </template>

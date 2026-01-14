@@ -17,7 +17,6 @@ const routes = [
   { name: 'archive', label: 'Archive' },
   { name: 'help', label: 'Help' },
 ]
-console.log(auth)
 </script>
 
 <template>
