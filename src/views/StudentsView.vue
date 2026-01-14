@@ -1,5 +1,6 @@
 <script setup>
 import RegisterModal from '@/assets/components/RegisterModal.vue'
+import SearchBar from '@/assets/components/SearchBar.vue'
 import { ref, computed, onMounted } from 'vue'
 
 const students = ref([])
@@ -78,12 +79,14 @@ onMounted(() => {
   <div class="p-8">
     <!-- Top controls -->
     <div class="flex items-center justify-between mb-4">
-      <input
-        type="text"
-        placeholder="Search"
-        v-model="search"
-        class="w-64 rounded-full border border-gray-400 px-3 py-1 text-sm focus:outline-none focus:border-blue-500"
-      />
+      <SearchBar v-model="search" />
+      <!--
+      Vue automatically converts it to:
+        <SearchBar
+          :modelValue="search"
+          @update:modelValue="search = $event"
+        />
+      -->
 
       <button
         class="rounded border border-gray-400 bg-gray-200 px-3 py-1 text-sm cursor-pointer hover:bg-gray-300 active:bg-gray-400"
