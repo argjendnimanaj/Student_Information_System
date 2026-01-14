@@ -1,5 +1,6 @@
 <script setup>
 import { login } from '@/services/authService'
+import { useAuthStore } from '@/stores/auth'
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -7,13 +8,14 @@ const username = ref('')
 const password = ref('')
 const usernameInput = ref(null)
 
-const serverError = ref('')
 const router = useRouter()
+const auth = useAuthStore()
 
 const errors = ref({
   username: '',
   password: '',
 })
+const serverError = ref('')
 
 const handleLogin = async () => {
   if (!formValidation()) return
@@ -23,9 +25,9 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value,
     })
-    localStorage.setItem('token', response.token)
 
-    router.push({ name: 'dashboard' })
+    auth.login(response.token)
+    router.push({ name: 'home' })
   } catch (err) {
     serverError.value = err.message
   }
@@ -57,6 +59,9 @@ onMounted(() => {
 </script>
 
 <template>
+  <div class="p-4 text-lg font-semibold">
+    <img src="../../assets/images/logo-hotelkey.png" alt="Logo" class="h-10 w-50" />
+  </div>
   <div class="flex flex-1 items-start justify-center mt-20">
     <div class="w-full max-w-sm text-sm">
       <!-- Title -->

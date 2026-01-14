@@ -15,9 +15,27 @@ const router = createRouter({
       //() => import(...) -> used for lazy loading views
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('../views/DashboardView.vue'),
+      path: '/home',
+      name: 'home',
+      component: () => import('../views/HomeView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/students',
+      name: 'students',
+      component: () => import('../views/StudentsView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/archive',
+      name: 'archive',
+      component: () => import('../views/ArchiveView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/help',
+      name: 'help',
+      component: () => import('../views/HelpView.vue'),
       meta: { requiresAuth: true },
     },
     {
@@ -36,7 +54,7 @@ router.beforeEach((to) => {
   }
 
   if (to.path === '/login' && token) {
-    return '/dashboard'
+    return '/students'
   }
 })
 
