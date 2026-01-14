@@ -26,8 +26,8 @@ const handleLogin = async () => {
       password: password.value,
     })
 
-    auth.login(response.token)
-    router.push({ name: 'home' })
+    auth.login(response.user, response.token)
+    router.push({ name: 'students' })
   } catch (err) {
     serverError.value = err.message
   }

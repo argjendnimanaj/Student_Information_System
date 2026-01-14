@@ -17,6 +17,7 @@ const routes = [
   { name: 'archive', label: 'Archive' },
   { name: 'help', label: 'Help' },
 ]
+console.log(auth)
 </script>
 
 <template>
@@ -26,7 +27,7 @@ const routes = [
       <div class="flex flex-row items-center justify-center">
         <img src="" alt="" />
         <div class="flex flex-col justify-center items-center">
-          <h3>Username</h3>
+          <h3>{{ auth.username }}</h3>
           <button @click="handleLogout" class="text-blue-500 underline cursor-pointer">
             Logout
           </button>

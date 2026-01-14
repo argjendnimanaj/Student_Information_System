@@ -5,7 +5,7 @@ export const login = async ({ username, password }) => {
   if (username === 'admin' && password === 'password123') {
     return {
       token: 'fake-token-123',
-      user: { username },
+      user: username,
     }
   }
 
