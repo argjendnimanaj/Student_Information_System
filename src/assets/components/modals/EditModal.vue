@@ -26,9 +26,19 @@ const confirmUpdate = () => {
 </script>
 
 <template>
-  <BaseModal title="Edit Student" @close="emit('close')" @confirm="confirmUpdate">
+  <BaseModal
+    title="Edit Student"
+    buttonLabel="Save"
+    @close="emit('close')"
+    @confirm="confirmUpdate"
+  >
     <div class="space-y-3 text-sm">
-      <input v-model="localStudent.id" type="number" class="w-full border px-3 py-1" />
+      <input
+        v-model="localStudent.id"
+        type="number"
+        class="w-full border px-3 py-1 opacity-50"
+        disabled
+      />
       <input v-model="localStudent.name" type="text" class="w-full border px-3 py-1" />
       <input v-model="localStudent.dob" type="date" class="w-full border px-3 py-1" />
       <input v-model="localStudent.municipality" type="text" class="w-full border px-3 py-1" />

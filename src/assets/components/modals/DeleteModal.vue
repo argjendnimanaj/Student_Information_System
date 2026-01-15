@@ -1,6 +1,7 @@
 <script setup>
 import BaseModal from './BaseModal.vue'
 const emit = defineEmits(['delete', 'close'])
+
 defineProps({
   student: {
     type: Object,

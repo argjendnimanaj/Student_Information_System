@@ -29,7 +29,12 @@ const closeModal = () => emit('close')
 </script>
 
 <template>
-  <BaseModal title="Register New Student" @close="closeModal" @confirm="saveStudent">
+  <BaseModal
+    title="Register New Student"
+    @close="closeModal"
+    @confirm="saveStudent"
+    buttonLabel="Save"
+  >
     <div class="space-y-3 text-sm">
       <input
         v-model="student.id"
