@@ -4,6 +4,11 @@ defineProps({
     type: String,
     required: true,
   },
+  buttonLabel: {
+    type: String,
+    required: true,
+    default: 'Save',
+  },
 })
 
 const emit = defineEmits(['close', 'confirm'])
@@ -28,7 +33,7 @@ const emit = defineEmits(['close', 'confirm'])
           class="border border-gray-400 bg-gray-200 px-4 py-1 text-sm hover:bg-gray-300"
           @click="emit('confirm')"
         >
-          Save
+          {{ buttonLabel }}
         </button>
       </div>
     </div>

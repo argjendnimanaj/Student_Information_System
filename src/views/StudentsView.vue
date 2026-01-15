@@ -1,4 +1,5 @@
 <script setup>
+import DeleteModal from '@/assets/components/modals/DeleteModal.vue'
 import EditModal from '@/assets/components/modals/EditModal.vue'
 import RegisterModal from '@/assets/components/modals/RegisterModal.vue'
 import SearchBar from '@/assets/components/SearchBar.vue'
@@ -7,16 +8,6 @@ import { ref, computed, onMounted } from 'vue'
 
 const students = ref([])
 const search = ref('')
-
-const openRegisterModal = ref(false)
-const showRegisterModal = () => (openRegisterModal.value = true)
-
-const openEditModal = ref(false)
-const editingStudent = ref(null)
-const openEdit = (student) => {
-  editingStudent.value = { ...student }
-  openEditModal.value = true
-}
 
 const filteredStudents = computed(() => {
   if (!search.value) return students.value
@@ -31,22 +22,63 @@ const filteredStudents = computed(() => {
   )
 })
 
+/**
+ * Registering a new student.
+ */
+const openRegisterModal = ref(false)
+const showRegisterModal = () => (openRegisterModal.value = true)
+
 const handleSaveStudent = (student) => {
   students.value.push(student)
   localStorage.setItem('students', JSON.stringify(students.value))
   openRegisterModal.value = false
 }
 
-const handleUpdateStudent = (updatedStudent) => {
-  const index = students.value.findIndex((student) => student.id === updatedStudent.id)
+/**
+ * Editing an existing student.
+ */
+const openEditModal = ref(false)
+const editingStudent = ref(null)
+const openEdit = (student) => {
+  editingStudent.value = { ...student }
+  openEditModal.value = true
+}
 
-  if (index !== -1) {
-    students.value[index] = updatedStudent
-    localStorage.setItem('students', JSON.stringify(students.value))
+const handleUpdateStudent = (updatedStudent) => {
+  const id = findStudent(updatedStudent)
+  if (id !== -1) {
+    students.value[id] = updatedStudent
+    setLocalStorage()
   }
 
   openEditModal.value = false
 }
+
+/**
+ * Deleting an existing student.
+ */
+const openDeleteModal = ref(false)
+const deletingStudent = ref(null)
+const showDeleteModal = (student) => {
+  openDeleteModal.value = true
+  deletingStudent.value = { ...student }
+}
+
+const handleDeleteStudent = () => {
+  const id = findStudent(deletingStudent.value)
+  if (id !== -1) {
+    students.value.splice(id, 1)
+    setLocalStorage()
+  }
+
+  openDeleteModal.value = false
+}
+
+/**
+ * Reusable functions
+ */
+const findStudent = (student) => students.value.findIndex((s) => s.id === student.id)
+const setLocalStorage = () => localStorage.setItem('students', JSON.stringify(students.value))
 
 const theadLabels = ['Index', 'Name', 'DoB', 'Municipality', 'Action']
 
@@ -131,6 +163,13 @@ onMounted(() => {
       @close="openEditModal = false"
     />
 
+    <DeleteModal
+      v-if="openDeleteModal"
+      :student="deletingStudent"
+      @delete="handleDeleteStudent"
+      @close="openDeleteModal = false"
+    />
+
     <!-- Table -->
     <div class="overflow-x-auto border border-gray-400">
       <TableBase :students="filteredStudents" :theadLabels="theadLabels">
@@ -154,7 +193,10 @@ onMounted(() => {
             >
               Edit
             </button>
-            <button class="text-blue-600 underline hover:text-blue-800 cursor-pointer">
+            <button
+              @click="showDeleteModal(student)"
+              class="text-blue-600 underline hover:text-blue-800 cursor-pointer"
+            >
               Delete
             </button>
           </td>
