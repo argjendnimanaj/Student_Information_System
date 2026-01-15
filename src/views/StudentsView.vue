@@ -4,10 +4,13 @@ import EditModal from '@/assets/components/modals/EditModal.vue'
 import RegisterModal from '@/assets/components/modals/RegisterModal.vue'
 import SearchBar from '@/assets/components/SearchBar.vue'
 import TableBase from '@/assets/components/TableBase.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 const students = ref([])
 const search = ref('')
+
+const currentPage = ref(1)
+const pageSize = 10
 
 const filteredStudents = computed(() => {
   if (!search.value) return students.value
@@ -20,6 +23,18 @@ const filteredStudents = computed(() => {
       student.dob.toLowerCase().includes(query) ||
       student.municipality.toLowerCase().includes(query),
   )
+})
+
+const totalPages = computed(() => Math.ceil(filteredStudents.value.length / pageSize))
+
+const paginatedStudents = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  const end = start + pageSize
+  return filteredStudents.value.slice(start, end)
+})
+
+watch(search, () => {
+  currentPage.value = 1
 })
 
 /**
@@ -87,42 +102,26 @@ onMounted(() => {
   students.value = saved
     ? JSON.parse(saved)
     : [
-        {
-          id: 1458,
-          name: 'Mergim Bajrami',
-          dob: '1989-10-05',
-          municipality: 'Prishtine',
-        },
-        {
-          id: 1452,
-          name: 'Blerton Rexha',
-          dob: '1989-10-05',
-          municipality: 'Prishtine',
-        },
-        {
-          id: 1461,
-          name: 'Abdullah Krasniqi',
-          dob: '1989-10-05',
-          municipality: 'Prishtine',
-        },
-        {
-          id: 1472,
-          name: 'Sami Salihu',
-          dob: '1989-10-05',
-          municipality: 'Prishtine',
-        },
-        {
-          id: 1491,
-          name: 'Visar Uruqi',
-          dob: '1989-10-05',
-          municipality: 'Prishtine',
-        },
-        {
-          id: 1232,
-          name: 'Naim Krasniqi',
-          dob: '1989-10-05',
-          municipality: 'Prishtine',
-        },
+        { id: 1458, name: 'Mergim Bajrami', dob: '1989-10-05', municipality: 'Prishtine' },
+        { id: 1459, name: 'Arta Krasniqi', dob: '1990-03-12', municipality: 'Prizren' },
+        { id: 1460, name: 'Flamur Dervishi', dob: '1988-07-22', municipality: 'Gjilan' },
+        { id: 1461, name: 'Liridona Ahmeti', dob: '1991-01-15', municipality: 'Ferizaj' },
+        { id: 1462, name: 'Besnik Rexhepi', dob: '1987-11-30', municipality: 'Peja' },
+        { id: 1463, name: 'Valentina Shala', dob: '1992-05-08', municipality: 'Mitrovica' },
+        { id: 1464, name: 'Driton Kelmendi', dob: '1989-09-14', municipality: 'Gjakova' },
+        { id: 1465, name: 'Elsa Berisha', dob: '1990-12-03', municipality: 'Vushtrri' },
+        { id: 1466, name: 'Ilir Hasani', dob: '1988-04-19', municipality: 'Podujeva' },
+        { id: 1467, name: 'Sara Musliu', dob: '1991-08-27', municipality: 'Lipjan' },
+        { id: 1469, name: 'Fjolla Gashi', dob: '1990-02-28', municipality: 'Prizren' },
+        { id: 1470, name: 'Gentian Leka', dob: '1988-10-17', municipality: 'Gjilan' },
+        { id: 1471, name: 'Hana Ismajli', dob: '1991-04-09', municipality: 'Ferizaj' },
+        { id: 1472, name: 'Kujtim Veliqi', dob: '1987-12-25', municipality: 'Peja' },
+        { id: 1473, name: 'Linda Kelmendi', dob: '1992-07-04', municipality: 'Mitrovica' },
+        { id: 1474, name: 'Mirsad Krasniqi', dob: '1989-11-21', municipality: 'Gjakova' },
+        { id: 1475, name: 'Nora Ahmetaj', dob: '1990-08-16', municipality: 'Vushtrri' },
+        { id: 1476, name: 'Orhan Dervishi', dob: '1988-03-30', municipality: 'Podujeva' },
+        { id: 1477, name: 'Rina Shala', dob: '1991-09-13', municipality: 'Lipjan' },
+        { id: 1478, name: 'Arben Thaçi', dob: '1989-06-11', municipality: 'Prishtine' },
       ]
 
   localStorage.setItem('students', JSON.stringify(students.value))
@@ -172,7 +171,7 @@ onMounted(() => {
 
     <!-- Table -->
     <div class="overflow-x-auto border border-gray-400">
-      <TableBase :students="filteredStudents" :theadLabels="theadLabels">
+      <TableBase :students="paginatedStudents" :theadLabels="theadLabels">
         <template #row="{ student }">
           <td class="border border-gray-400 px-2 py-1">
             {{ student.id }}
@@ -202,6 +201,25 @@ onMounted(() => {
           </td>
         </template>
       </TableBase>
+    </div>
+    <div v-if="totalPages > 1" class="mt-4 flex items-center justify-end gap-2 text-sm">
+      <button
+        class="border px-3 py-1 disabled:opacity-50"
+        :disabled="currentPage === 1"
+        @click="currentPage--"
+      >
+        Prev
+      </button>
+
+      <span> Page {{ currentPage }} of {{ totalPages }} </span>
+
+      <button
+        class="border px-3 py-1 disabled:opacity-50"
+        :disabled="currentPage === totalPages"
+        @click="currentPage++"
+      >
+        Next
+      </button>
     </div>
   </div>
 </template>
