@@ -11,6 +11,7 @@ const search = ref('')
 
 const currentPage = ref(1)
 const pageSize = 10
+const archivedStudents = ref(JSON.parse(localStorage.getItem('archivedStudents')))
 
 const filteredStudents = computed(() => {
   if (!search.value) return students.value
@@ -63,14 +64,14 @@ const handleUpdateStudent = (updatedStudent) => {
   const id = findStudent(updatedStudent)
   if (id !== -1) {
     students.value[id] = updatedStudent
-    setLocalStorage()
+    updateLocalStorages()
   }
 
   openEditModal.value = false
 }
 
 /**
- * Deleting an existing student.
+ * Deleting an existing student and add him to the archived.
  */
 const openDeleteModal = ref(false)
 const deletingStudent = ref(null)
@@ -80,10 +81,11 @@ const showDeleteModal = (student) => {
 }
 
 const handleDeleteStudent = () => {
-  const id = findStudent(deletingStudent.value)
-  if (id !== -1) {
-    students.value.splice(id, 1)
-    setLocalStorage()
+  const index = findStudent(deletingStudent.value)
+  if (index !== -1) {
+    students.value.splice(index, 1)
+    archivedStudents.value.push(deletingStudent.value)
+    updateLocalStorages()
   }
 
   openDeleteModal.value = false
@@ -93,7 +95,10 @@ const handleDeleteStudent = () => {
  * Reusable functions
  */
 const findStudent = (student) => students.value.findIndex((s) => s.id === student.id)
-const setLocalStorage = () => localStorage.setItem('students', JSON.stringify(students.value))
+const updateLocalStorages = () => {
+  localStorage.setItem('students', JSON.stringify(students.value))
+  localStorage.setItem('archivedStudents', JSON.stringify(archivedStudents.value))
+}
 
 const theadLabels = ['Index', 'Name', 'DoB', 'Municipality', 'Action']
 
