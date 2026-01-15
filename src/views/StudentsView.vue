@@ -26,12 +26,48 @@ const filteredStudents = computed(() => {
   )
 })
 
+const sortKey = ref(null)
+const sortDirection = ref('desc')
+const sortedStudents = computed(() => {
+  if (!sortKey.value) return filteredStudents.value
+
+  return [...filteredStudents.value].sort((a, b) => {
+    if (sortKey.value === 'date of birth') {
+      let dateA = a.dob
+      let dateB = b.dob
+      dateA = new Date(dateA)
+      dateB = new Date(dateB)
+
+      return sortDirection.value === 'asc' ? dateA - dateB : dateB - dateA
+    }
+
+    if (sortKey.value === 'name') {
+      return sortDirection.value === 'asc'
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name)
+    }
+
+    if (sortKey.value === 'municipality') {
+      return sortDirection.value === 'asc'
+        ? a.municipality.localeCompare(b.municipality)
+        : b.municipality.localeCompare(a.municipality)
+    }
+
+    return
+  })
+})
+
+const sortBy = (label) => {
+  sortKey.value = label.toLowerCase()
+  sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+}
+
 const totalPages = computed(() => Math.ceil(filteredStudents.value.length / pageSize))
 
 const paginatedStudents = computed(() => {
   const start = (currentPage.value - 1) * pageSize
   const end = start + pageSize
-  return filteredStudents.value.slice(start, end)
+  return sortedStudents.value.slice(start, end)
 })
 
 watch(search, () => {
@@ -100,7 +136,7 @@ const updateLocalStorages = () => {
   localStorage.setItem('archivedStudents', JSON.stringify(archivedStudents.value))
 }
 
-const theadLabels = ['Index', 'Name', 'DoB', 'Municipality', 'Action']
+const theadLabels = ['Index', 'Name', 'Date of Birth', 'Municipality', 'Action']
 
 onMounted(() => {
   const saved = localStorage.getItem('students')
@@ -176,7 +212,13 @@ onMounted(() => {
 
     <!-- Table -->
     <div class="overflow-x-auto border border-gray-400">
-      <TableBase :students="paginatedStudents" :theadLabels="theadLabels">
+      <TableBase
+        :students="paginatedStudents"
+        :theadLabels="theadLabels"
+        :sortKey="sortKey"
+        :sortDirection="sortDirection"
+        @sort="sortBy"
+      >
         <template #row="{ student }">
           <td class="border border-gray-400 px-2 py-1">
             {{ student.id }}

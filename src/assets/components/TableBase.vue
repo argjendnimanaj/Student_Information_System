@@ -1,5 +1,5 @@
 <script setup>
-defineProps({
+const props = defineProps({
   students: {
     type: Array,
     required: true,
@@ -8,7 +8,25 @@ defineProps({
     type: Array,
     required: true,
   },
+  sortKey: {
+    type: String,
+    default: null,
+  },
+  sortDirection: {
+    type: String,
+    default: 'asc',
+  },
 })
+
+const emit = defineEmits(['sort'])
+const sortableLabels = ['Name', 'Date of Birth', 'Municipality']
+
+const getSortIcon = (label) => {
+  const key = label.toLowerCase()
+
+  if (props.sortKey !== key) return '↕'
+  return props.sortDirection === 'asc' ? '▲' : '▼'
+}
 </script>
 
 <template>
@@ -19,8 +37,15 @@ defineProps({
           v-for="label in theadLabels"
           :key="label"
           class="border border-gray-400 px-2 py-1 text-left"
+          @click="sortableLabels.includes(label) && emit('sort', label)"
         >
-          {{ label }}
+          <span class="flex items-center justify-between gap-1 px-2">
+            {{ label }}
+
+            <span v-if="sortableLabels.includes(label)" class="text-xs">
+              {{ getSortIcon(label) }}
+            </span>
+          </span>
         </th>
       </tr>
     </thead>
