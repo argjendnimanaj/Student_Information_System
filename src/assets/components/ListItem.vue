@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps({
+defineProps({
   routeName: {
     type: String,
     required: true,
@@ -13,9 +13,13 @@ const props = defineProps({
 })
 </script>
 <template>
-  <li class="text-blue-500 underline px-2 focus:text-black">
-    <router-link :to="{ name: props.routeName }">
-      {{ props.label }}
+  <li>
+    <router-link
+      :to="{ name: routeName }"
+      class="px-4 py-2 text-blue-600 transition"
+      active-class="border-b-2 border-blue-600"
+    >
+      {{ label }}
     </router-link>
   </li>
   |

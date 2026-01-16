@@ -20,11 +20,11 @@ const routes = [
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-white">
+  <div class="min-h-screen flex flex-col bg-white px-3">
     <nav v-if="auth.token" class="flex flex-row justify-between items-center py-3">
       <h1 class="font-3xl font-semibold">Student Information System</h1>
       <div class="flex flex-row items-center justify-center">
-        <img src="" alt="" />
+        <img src="./assets/images/profile-icon.jpg" alt="Profile Icon" width="40px" height="40px" />
         <div class="flex flex-col justify-center items-center">
           <h3>{{ auth.username }}</h3>
           <button @click="handleLogout" class="text-blue-500 underline cursor-pointer">

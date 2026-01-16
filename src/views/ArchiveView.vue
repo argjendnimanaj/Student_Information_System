@@ -2,6 +2,8 @@
 import ArchiveModal from '@/assets/components/modals/ArchiveModal.vue'
 import SearchBar from '@/assets/components/SearchBar.vue'
 import TableBase from '@/assets/components/TableBase.vue'
+import { usePagination } from '@/composables/usePagination'
+import { useSorting } from '@/composables/useSorting'
 import { computed, onMounted, ref } from 'vue'
 
 const search = ref('')
@@ -23,12 +25,17 @@ const filteredArchived = computed(() => {
   )
 })
 
+const sortKey = ref(null)
+const sortDirection = ref('desc')
+const { sortedStudents: sortedArchived } = useSorting(filteredArchived, sortKey, sortDirection)
+
+const sortBy = (label) => {
+  sortKey.value = label.toLowerCase()
+  sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+}
+
 const totalPages = computed(() => Math.ceil(filteredArchived.value.length / pageSize))
-const paginatedArchived = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  const end = start + pageSize
-  return filteredArchived.value.slice(start, end)
-})
+const { paginatedItems: paginatedArchived } = usePagination(sortedArchived, currentPage)
 
 /**
  * Restore the selected user
@@ -159,7 +166,13 @@ onMounted(() => {
 
     <!-- Table -->
     <div class="overflow-x-auto border border-gray-400">
-      <TableBase :students="paginatedArchived" :theadLabels="theadLabels">
+      <TableBase
+        :students="paginatedArchived"
+        :theadLabels="theadLabels"
+        :sortKey="sortKey"
+        :sortDirection="sortDirection"
+        @sort="sortBy"
+      >
         <template #row="{ student }">
           <td class="border border-gray-400 px-2 py-1">
             {{ student.id }}

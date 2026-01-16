@@ -4,6 +4,8 @@ import EditModal from '@/assets/components/modals/EditModal.vue'
 import RegisterModal from '@/assets/components/modals/RegisterModal.vue'
 import SearchBar from '@/assets/components/SearchBar.vue'
 import TableBase from '@/assets/components/TableBase.vue'
+import { usePagination } from '@/composables/usePagination'
+import { useSorting } from '@/composables/useSorting'
 import { ref, computed, onMounted, watch } from 'vue'
 
 const students = ref([])
@@ -28,34 +30,7 @@ const filteredStudents = computed(() => {
 
 const sortKey = ref(null)
 const sortDirection = ref('desc')
-const sortedStudents = computed(() => {
-  if (!sortKey.value) return filteredStudents.value
-
-  return [...filteredStudents.value].sort((a, b) => {
-    if (sortKey.value === 'date of birth') {
-      let dateA = a.dob
-      let dateB = b.dob
-      dateA = new Date(dateA)
-      dateB = new Date(dateB)
-
-      return sortDirection.value === 'asc' ? dateA - dateB : dateB - dateA
-    }
-
-    if (sortKey.value === 'name') {
-      return sortDirection.value === 'asc'
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
-    }
-
-    if (sortKey.value === 'municipality') {
-      return sortDirection.value === 'asc'
-        ? a.municipality.localeCompare(b.municipality)
-        : b.municipality.localeCompare(a.municipality)
-    }
-
-    return
-  })
-})
+const { sortedStudents } = useSorting(filteredStudents, sortKey, sortDirection)
 
 const sortBy = (label) => {
   sortKey.value = label.toLowerCase()
@@ -64,11 +39,7 @@ const sortBy = (label) => {
 
 const totalPages = computed(() => Math.ceil(filteredStudents.value.length / pageSize))
 
-const paginatedStudents = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  const end = start + pageSize
-  return sortedStudents.value.slice(start, end)
-})
+const { paginatedItems: paginatedStudents } = usePagination(sortedStudents, currentPage)
 
 watch(search, () => {
   currentPage.value = 1
@@ -107,7 +78,7 @@ const handleUpdateStudent = (updatedStudent) => {
 }
 
 /**
- * Deleting an existing student and add him to the archived.
+ * Deleting an existing student and adding him to the archived.
  */
 const openDeleteModal = ref(false)
 const deletingStudent = ref(null)
@@ -120,7 +91,11 @@ const handleDeleteStudent = () => {
   const index = findStudent(deletingStudent.value)
   if (index !== -1) {
     students.value.splice(index, 1)
-    archivedStudents.value.push(deletingStudent.value)
+
+    archivedStudents.value.push({
+      ...deletingStudent.value,
+      archivedAt: new Date().toISOString().split('T')[0],
+    })
     updateLocalStorages()
   }
 
