@@ -4,14 +4,16 @@ import SearchBar from '@/assets/components/SearchBar.vue'
 import TableBase from '@/assets/components/TableBase.vue'
 import { usePagination } from '@/composables/usePagination'
 import { useSorting } from '@/composables/useSorting'
+import { useStudentsStore } from '@/stores/studentsStore'
+import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
 
 const search = ref('')
-const archivedStudents = ref([])
-
 const currentPage = ref(1)
 const pageSize = 10
-const students = ref(JSON.parse(localStorage.getItem('students')))
+const studentsStore = useStudentsStore();
+const { archivedStudents } = storeToRefs(studentsStore)
+const { loadArchivedStudents, restoreStudent: restoreFunc } = studentsStore
 
 const filteredArchived = computed(() => {
   if (!search.value) return archivedStudents.value
@@ -48,106 +50,14 @@ const restoreStudent = (student) => {
 }
 
 const handleRestore = () => {
-  students.value.push(restoringStudent.value)
-
-  const index = findStudent(restoringStudent.value)
-  archivedStudents.value.splice(index, 1)
-
-  updateLocalStorages()
+  restoreFunc(restoringStudent.value)
   openRestoreModal.value = false
-}
-
-/**
- * Reusable functions
- */
-const findStudent = (student) => archivedStudents.value.findIndex((s) => s.id === student.id)
-
-const updateLocalStorages = () => {
-  localStorage.setItem('archivedStudents', JSON.stringify(archivedStudents.value))
-  localStorage.setItem('students', JSON.stringify(students.value))
 }
 
 const theadLabels = ['ID', 'Name', 'Date of Birth', 'Municipality', 'Archive Date', 'Actions']
 
 onMounted(() => {
-  const saved = localStorage.getItem('archivedStudents')
-
-  archivedStudents.value = saved
-    ? JSON.parse(saved)
-    : [
-        {
-          id: 1000,
-          name: 'Alice Johnson',
-          dob: '2005-03-15',
-          municipality: 'New York',
-          archivedAt: '2023-06-01',
-        },
-        {
-          id: 1001,
-          name: 'Bob Smith',
-          dob: '2004-07-22',
-          municipality: 'Los Angeles',
-          archivedAt: '2022-12-15',
-        },
-        {
-          id: 1002,
-          name: 'Charlie Brown',
-          dob: '2006-01-10',
-          municipality: 'Chicago',
-          archivedAt: '2024-02-20',
-        },
-        {
-          id: 1003,
-          name: 'Diana Prince',
-          dob: '2005-09-05',
-          municipality: 'Houston',
-          archivedAt: '2023-08-10',
-        },
-        {
-          id: 1004,
-          name: 'Ethan Hunt',
-          dob: '2004-11-30',
-          municipality: 'Phoenix',
-          archivedAt: '2022-10-05',
-        },
-        {
-          id: 1005,
-          name: 'Fiona Green',
-          dob: '2006-04-18',
-          municipality: 'Philadelphia',
-          archivedAt: '2024-01-12',
-        },
-        {
-          id: 1006,
-          name: 'George Miller',
-          dob: '2005-12-07',
-          municipality: 'San Antonio',
-          archivedAt: '2023-11-25',
-        },
-        {
-          id: 1007,
-          name: 'Hannah Lee',
-          dob: '2004-05-14',
-          municipality: 'San Diego',
-          archivedAt: '2022-09-30',
-        },
-        {
-          id: 1008,
-          name: 'Ian Clark',
-          dob: '2006-08-25',
-          municipality: 'Dallas',
-          archivedAt: '2024-03-18',
-        },
-        {
-          id: 1009,
-          name: 'Julia Roberts',
-          dob: '2005-06-12',
-          municipality: 'San Jose',
-          archivedAt: '2023-07-22',
-        },
-      ]
-
-  localStorage.setItem('archivedStudents', JSON.stringify(archivedStudents.value))
+  loadArchivedStudents()
 })
 </script>
 

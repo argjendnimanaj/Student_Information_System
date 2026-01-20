@@ -6,21 +6,21 @@ import SearchBar from '@/assets/components/SearchBar.vue'
 import TableBase from '@/assets/components/TableBase.vue'
 import { usePagination } from '@/composables/usePagination'
 import { useSorting } from '@/composables/useSorting'
+import { useStudentsStore } from '@/stores/studentsStore'
 import { ref, computed, onMounted, watch } from 'vue'
 
-const students = ref([])
 const search = ref('')
 
 const currentPage = ref(1)
 const pageSize = 10
-const archivedStudents = ref(JSON.parse(localStorage.getItem('archivedStudents')))
+const studentsStore = useStudentsStore()
 
 const filteredStudents = computed(() => {
-  if (!search.value) return students.value
+  if (!search.value) return studentsStore.students
 
   const query = search.value.toLowerCase()
 
-  return students.value.filter(
+  return studentsStore.students.filter(
     (student) =>
       student.name.toLowerCase().includes(query) ||
       student.dob.toLowerCase().includes(query) ||
@@ -52,8 +52,7 @@ const openRegisterModal = ref(false)
 const showRegisterModal = () => (openRegisterModal.value = true)
 
 const handleSaveStudent = (student) => {
-  students.value.push(student)
-  localStorage.setItem('students', JSON.stringify(students.value))
+  studentsStore.addStudent(student)
   openRegisterModal.value = false
 }
 
@@ -68,12 +67,7 @@ const openEdit = (student) => {
 }
 
 const handleUpdateStudent = (updatedStudent) => {
-  const id = findStudent(updatedStudent)
-  if (id !== -1) {
-    students.value[id] = updatedStudent
-    updateLocalStorages()
-  }
-
+  studentsStore.editStudent(updatedStudent)
   openEditModal.value = false
 }
 
@@ -88,59 +82,14 @@ const showDeleteModal = (student) => {
 }
 
 const handleDeleteStudent = () => {
-  const index = findStudent(deletingStudent.value)
-  if (index !== -1) {
-    students.value.splice(index, 1)
-
-    archivedStudents.value.push({
-      ...deletingStudent.value,
-      archivedAt: new Date().toISOString().split('T')[0],
-    })
-    updateLocalStorages()
-  }
-
+  studentsStore.deleteStudent(deletingStudent.value)
   openDeleteModal.value = false
-}
-
-/**
- * Reusable functions
- */
-const findStudent = (student) => students.value.findIndex((s) => s.id === student.id)
-const updateLocalStorages = () => {
-  localStorage.setItem('students', JSON.stringify(students.value))
-  localStorage.setItem('archivedStudents', JSON.stringify(archivedStudents.value))
 }
 
 const theadLabels = ['Index', 'Name', 'Date of Birth', 'Municipality', 'Action']
 
 onMounted(() => {
-  const saved = localStorage.getItem('students')
-  students.value = saved
-    ? JSON.parse(saved)
-    : [
-        { id: 1458, name: 'Mergim Bajrami', dob: '1989-10-05', municipality: 'Prishtine' },
-        { id: 1459, name: 'Arta Krasniqi', dob: '1990-03-12', municipality: 'Prizren' },
-        { id: 1460, name: 'Flamur Dervishi', dob: '1988-07-22', municipality: 'Gjilan' },
-        { id: 1461, name: 'Liridona Ahmeti', dob: '1991-01-15', municipality: 'Ferizaj' },
-        { id: 1462, name: 'Besnik Rexhepi', dob: '1987-11-30', municipality: 'Peja' },
-        { id: 1463, name: 'Valentina Shala', dob: '1992-05-08', municipality: 'Mitrovica' },
-        { id: 1464, name: 'Driton Kelmendi', dob: '1989-09-14', municipality: 'Gjakova' },
-        { id: 1465, name: 'Elsa Berisha', dob: '1990-12-03', municipality: 'Vushtrri' },
-        { id: 1466, name: 'Ilir Hasani', dob: '1988-04-19', municipality: 'Podujeva' },
-        { id: 1467, name: 'Sara Musliu', dob: '1991-08-27', municipality: 'Lipjan' },
-        { id: 1469, name: 'Fjolla Gashi', dob: '1990-02-28', municipality: 'Prizren' },
-        { id: 1470, name: 'Gentian Leka', dob: '1988-10-17', municipality: 'Gjilan' },
-        { id: 1471, name: 'Hana Ismajli', dob: '1991-04-09', municipality: 'Ferizaj' },
-        { id: 1472, name: 'Kujtim Veliqi', dob: '1987-12-25', municipality: 'Peja' },
-        { id: 1473, name: 'Linda Kelmendi', dob: '1992-07-04', municipality: 'Mitrovica' },
-        { id: 1474, name: 'Mirsad Krasniqi', dob: '1989-11-21', municipality: 'Gjakova' },
-        { id: 1475, name: 'Nora Ahmetaj', dob: '1990-08-16', municipality: 'Vushtrri' },
-        { id: 1476, name: 'Orhan Dervishi', dob: '1988-03-30', municipality: 'Podujeva' },
-        { id: 1477, name: 'Rina Shala', dob: '1991-09-13', municipality: 'Lipjan' },
-        { id: 1478, name: 'Arben Thaçi', dob: '1989-06-11', municipality: 'Prishtine' },
-      ]
-
-  localStorage.setItem('students', JSON.stringify(students.value))
+  studentsStore.loadStudents()
 })
 </script>
 
