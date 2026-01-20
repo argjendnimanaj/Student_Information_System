@@ -6,14 +6,14 @@ import { usePagination } from '@/composables/usePagination'
 import { useSorting } from '@/composables/useSorting'
 import { useStudentsStore } from '@/stores/studentsStore'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const search = ref('')
 const currentPage = ref(1)
 const pageSize = 10
 const studentsStore = useStudentsStore();
 const { archivedStudents } = storeToRefs(studentsStore)
-const { loadArchivedStudents, restoreStudent: restoreFunc } = studentsStore
+const { restoreStudent: restoreFunc } = studentsStore
 
 const filteredArchived = computed(() => {
   if (!search.value) return archivedStudents.value
@@ -55,10 +55,6 @@ const handleRestore = () => {
 }
 
 const theadLabels = ['ID', 'Name', 'Date of Birth', 'Municipality', 'Archive Date', 'Actions']
-
-onMounted(() => {
-  loadArchivedStudents()
-})
 </script>
 
 <template>

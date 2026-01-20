@@ -7,20 +7,23 @@ import TableBase from '@/assets/components/TableBase.vue'
 import { usePagination } from '@/composables/usePagination'
 import { useSorting } from '@/composables/useSorting'
 import { useStudentsStore } from '@/stores/studentsStore'
-import { ref, computed, onMounted, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { ref, computed, watch } from 'vue'
 
 const search = ref('')
 
 const currentPage = ref(1)
 const pageSize = 10
 const studentsStore = useStudentsStore()
+const { students } = storeToRefs(studentsStore)
+const { addStudent, editStudent, deleteStudent } = studentsStore
 
 const filteredStudents = computed(() => {
-  if (!search.value) return studentsStore.students
+  if (!search.value) return students.value
 
   const query = search.value.toLowerCase()
 
-  return studentsStore.students.filter(
+  return students.value.filter(
     (student) =>
       student.name.toLowerCase().includes(query) ||
       student.dob.toLowerCase().includes(query) ||
@@ -52,7 +55,7 @@ const openRegisterModal = ref(false)
 const showRegisterModal = () => (openRegisterModal.value = true)
 
 const handleSaveStudent = (student) => {
-  studentsStore.addStudent(student)
+  addStudent(student)
   openRegisterModal.value = false
 }
 
@@ -67,7 +70,7 @@ const openEdit = (student) => {
 }
 
 const handleUpdateStudent = (updatedStudent) => {
-  studentsStore.editStudent(updatedStudent)
+  editStudent(updatedStudent)
   openEditModal.value = false
 }
 
@@ -82,15 +85,11 @@ const showDeleteModal = (student) => {
 }
 
 const handleDeleteStudent = () => {
-  studentsStore.deleteStudent(deletingStudent.value)
+  deleteStudent(deletingStudent.value)
   openDeleteModal.value = false
 }
 
 const theadLabels = ['Index', 'Name', 'Date of Birth', 'Municipality', 'Action']
-
-onMounted(() => {
-  studentsStore.loadStudents()
-})
 </script>
 
 <template>
