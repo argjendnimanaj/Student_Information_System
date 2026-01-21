@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/stores/auth'
 import NotFound from '@/views/error/NotFound.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -47,7 +48,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const token = localStorage.getItem('token')
+  const authStore = useAuthStore()
+  const { token } = authStore
 
   if (to.meta.requiresAuth && !token) {
     return '/login'
